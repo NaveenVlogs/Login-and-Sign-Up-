@@ -1,0 +1,216 @@
+
+public class LoginActivity extends AppCompatActivity {
+
+   Button btnlogin;
+    Toolbar toolbar;
+    TextView click;
+    EditText etemail,etpassword;
+    FirebaseAuth mFirebaseAuth;
+    private FirebaseAuth.AuthStateListener mAuthstateListner;
+
+
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+        click = findViewById(R.id.click);
+        toolbar= findViewById(R.id.toolbar);
+        btnlogin= findViewById(R.id.btnlogin);
+       etpassword = findViewById(R.id.etpassword);
+        etemail= findViewById(R.id.etemail);
+        setSupportActionBar(toolbar);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        mFirebaseAuth = FirebaseAuth .getInstance();
+
+
+        mAuthstateListner = new FirebaseAuth.AuthStateListener() {
+
+            @Override
+            public void onAuthStateChanged(@NonNull  FirebaseAuth firebaseAuth) {
+
+                FirebaseUser mFirebaseuer = mFirebaseAuth.getCurrentUser();
+
+                if (mFirebaseuer != null ){
+                    Toast.makeText(LoginActivity.this, "You Are Loged in", Toast.LENGTH_SHORT).show();
+                    Intent i = new Intent(getApplicationContext(),FetchDataActivity.class);
+                    startActivity(i);
+
+                }
+                else {
+                    Toast.makeText(LoginActivity.this, "please login here", Toast.LENGTH_SHORT).show();
+                }
+
+
+
+            }
+        };
+        btnlogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+
+                String email = etemail.getText().toString();
+                String password = etpassword.getText().toString();
+
+                if (email.isEmpty()) {
+                    etemail.setError("enter email here");
+                    etemail.requestFocus();
+                    return;
+                } else if (password.isEmpty()) {
+                    etpassword.setError("enter password here");
+                    etpassword.requestFocus();
+
+                } else if (email.isEmpty() && password.isEmpty()) {
+                    Toast.makeText(getApplicationContext(), "Fields are is empty", Toast.LENGTH_LONG).show();
+
+
+                } else if (!(email.isEmpty() && password.isEmpty())) {
+
+                    mFirebaseAuth.signInWithEmailAndPassword(email,password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull  Task<AuthResult> task) {
+
+                            if (task.isSuccessful()){
+                                Toast.makeText(LoginActivity.this, "Login Succesfull", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(getApplicationContext(),FetchDataActivity.class);
+                                startActivity(intent);
+                            }
+                            else {
+                                Toast.makeText(LoginActivity.this, "Login error", Toast.LENGTH_SHORT).show();
+                            }
+
+                        }
+                    });
+
+                }
+                else {
+                    Toast.makeText(LoginActivity.this, "error occupied", Toast.LENGTH_SHORT).show();
+                }
+
+                }
+
+
+        });
+
+		// click here to go signup screen
+        click.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(),SignupActivity.class);
+                startActivity(intent);
+            }
+        });
+
+    }
+
+
+
+		// signup screen  code start from  here
+
+
+public class SignupActivity extends AppCompatActivity {
+
+    Button btnsignup;
+    EditText etidusername,etidemail,etidpassword;
+    FirebaseAuth mAuthFirebase;
+
+
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_signup);
+
+        btnsignup= findViewById(R.id.btnsignup);
+        etidusername= findViewById(R.id.etidusername);
+        etidemail= findViewById(R.id.etidemail);
+        etidpassword= findViewById(R.id.etidpassword);
+        mAuthFirebase =FirebaseAuth.getInstance();
+
+        btnsignup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                getregister();
+
+            }
+        });
+
+    }
+
+    private void getregister() {
+
+        String username = etidusername.getText().toString().trim();
+        String email = etidemail.getText().toString().trim();
+        String password = etidpassword.getText().toString().trim();
+
+        if (username.isEmpty()){
+            etidusername.setError("enter username here");
+            etidusername.requestFocus();
+            return;
+        }
+        if (email.isEmpty()){
+            etidemail.setError("enter email here");
+            etidemail.requestFocus();
+            return;
+        }
+//        if(! Patterns.EMAIL_ADDRESS.matcher(email.toString().){
+//
+//        }
+
+        if (password.isEmpty()){
+
+            etidpassword.setError("enter password here");
+            etidpassword.requestFocus();
+            return;
+
+        }
+        if (password.length()<8){
+            etidpassword.setError("password is to  short");
+            etidpassword.requestFocus();
+            return;
+        }
+        if (password.length()>30){
+            etidpassword.setError("password is to  long");
+            etidpassword.requestFocus();
+        }
+        else {
+
+                userRegioster(username,email,password);
+
+        }
+
+
+    }
+
+    private void userRegioster(String username, String email, String password) {
+
+        mAuthFirebase.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+            @Override
+            public void onComplete(@NonNull  Task<AuthResult> task) {
+
+                etidemail.setText("");
+                etidusername.setText("");
+                etidpassword.setText("");
+
+                if (task.isSuccessful()){
+                    Toast.makeText(SignupActivity.this, "Registerd", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getApplicationContext(),LoginActivity.class);
+                    startActivity(intent);
+                }
+                else {
+                    Toast.makeText(SignupActivity.this, "somethiong went wrong", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+
+
+
+    }
+}
+
+
